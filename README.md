@@ -1,5 +1,4 @@
 # learn ML and Operation
-#MLops 
+# MLops 
 contents:
-#Module1: Employing Machine
- Learning Operations
+# Module1: Employing Machine Learning Operations
