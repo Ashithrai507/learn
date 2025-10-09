@@ -1,7 +1,7 @@
 # learn ML and Operation
 
 <details>
-    <summary> Large Language Model (LLM)</summary>
+    <summary> Large Language Model (LLM) </summary>
 
 
 <details>
