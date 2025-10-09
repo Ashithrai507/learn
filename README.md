@@ -1,5 +1,41 @@
 # learn ML and Operation
 
+## 📘 Project Documentation
+
+<details>
+  <summary>🚀 Installation Guide</summary>
+
+  1. Clone this repository  
+     ```bash
+     git clone https://github.com/your-username/your-repo.git
+     ```
+  2. Navigate into the project folder  
+     ```bash
+     cd your-repo
+     ```
+  3. Install dependencies  
+     ```bash
+     npm install
+     ```
+</details>
+
+<details>
+  <summary>🧠 How It Works</summary>
+
+  This project uses a machine learning model that:
+  - Takes input data
+  - Processes it through a neural network
+  - Outputs predictions in real time  
+</details>
+
+<details>
+  <summary>📸 Screenshots</summary>
+
+  ![Screenshot 1](images/screen1.png)
+  ![Screenshot 2](images/screen2.png)
+</details>
+
+
 
 ## What is a Large Language Model (LLM)
 Large Language Models (LLMs) are advanced AI systems built on deep neural networks designed to process, understand and generate human-like text. By using massive datasets and billions of parameters, LLMs have transformed the way humans interact with technology. It learns patterns, grammar and context from text and can answer questions, write content, translate languages and many more. Mordern LLMs include ChatGPT (OpenAI), Google Gemini, Anthropic Claude, etc.
