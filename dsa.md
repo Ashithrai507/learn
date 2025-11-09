@@ -30,6 +30,8 @@ For handling queues (like print jobs or requests), use a queue.
 | **Stack**       | LIFO (Last In, First Out) structure                   | Undo/Redo, Function calls |
 | **Queue**       | FIFO (First In, First Out) structure                  | Task scheduling           |
 
+here you can learn:
+Array:[website][https://www.youtube.com/watch?v=G38hQKXa_RU]
 
 ## Non-Linear Data Structures
 
