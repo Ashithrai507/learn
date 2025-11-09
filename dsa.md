@@ -31,7 +31,7 @@ For handling queues (like print jobs or requests), use a queue.
 | **Queue**       | FIFO (First In, First Out) structure                  | Task scheduling           |
 
 here you can learn:
-Array:[website][https://www.youtube.com/watch?v=G38hQKXa_RU]
+Array:[https://www.youtube.com/watch?v=G38hQKXa_RU]
 
 ## Non-Linear Data Structures
 
