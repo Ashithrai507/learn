@@ -33,17 +33,19 @@ For handling queues (like print jobs or requests), use a queue.
 here you can learn:
 Array:[https://www.youtube.com/watch?v=G38hQKXa_RU]
 
-liked list:
+## liked list:
+
 Three types 
-**Singly Linked**
+
+### **Singly Linked**
 
 The singly linked list is the simplest form of linked list in which the node contains two members data and a next pointer that stores the address of the next node.
 
-**Doubly Linked List**
+### **Doubly Linked List**
 
 The doubly linked list is the modified version of the singly linked list where each node of the doubly linked consists of three data members data, next and prev. The prev is a pointer that stores the address of the previous node in the linked list sequence.
 
-**Circular Linked List**
+### **Circular Linked List**
 
 Circular linked list can be represented as pointer to the first node where each node contains:
 
