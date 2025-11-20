@@ -52,6 +52,15 @@ Circular linked list can be represented as pointer to the first node where each 
 **Data: Actual information is stored.**
 **Next: Pointer to the next node and last node Next is pointed to the first node of the linked list.**
 
+### Stack
+
+| Operation           | Description                               | Example                |
+| ------------------- | ----------------------------------------- | ---------------------- |
+| `push(x)`           | Adds element `x` to the top               | Push 10 → stack = [10] |
+| `pop()`             | Removes top element                       | Pop → stack = []       |
+| `top()` or `peek()` | Returns top element (without removing it) | Top → 10               |
+| `empty()`           | Checks if stack is empty                  | Returns true/false     |
+| `size()`            | Returns number of elements                | Size → 1               |
 
 
 ## Non-Linear Data Structures
@@ -67,5 +76,62 @@ Circular linked list can be represented as pointer to the first node where each 
 | ------------------------- | -------------------------------- | ------------------ |
 | **Hash Table / Hash Map** | Key-value pairs for quick lookup | Databases, caching |
 
-goinig on
+### What is a Hash Table?
+
+#### A hash table (or hash map) is a data structure that stores key–value pairs and allows extremely fast:
+
+**Insertion**
+
+**Deletion**
+
+**Search**
+
+All in O(1) average time.
+
+#### 1. Key-Value Pair
+
+Like:
+
+Key = "Name"
+
+Value = "Phone Number"
+
+``` m
+"apple"  →  100
+"banana" →  200
+
+```
+
+#### 2. Hash Function
+
+A function that converts a key into an index of the hash table.
+
+Example:
+
+``` m
+hash("apple") → 2
+hash("banana") → 5
+
+```
+
+#### 3. Index / Bucket
+
+Position in the table where data is stored.
+
+Example:
+
+``` m
+Index: 0  1  2         5 ...
+Data : -  -  apple     banana  
+```
+
+#### 4. Collision
+
+When two keys get mapped to the same index.
+
+Example:
+``` m
+hash("cat") → 3
+hash("dog") → 3
+``` 
 
