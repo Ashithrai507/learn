@@ -1,0 +1,10 @@
+{
+  "level1": {
+    "objects": [
+      { "type": "floor", "pos": [0, 0], "width": 10 },
+      { "type": "trap_fall", "trigger": "player_near_goal", "section": [6,0,2] },
+      { "type": "crusher_side", "pos": [8,2], "speed": 5 },
+      { "type": "stairs", "steps": [] }
+    ]
+  }
+}
