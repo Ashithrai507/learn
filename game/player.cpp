@@ -11,12 +11,13 @@ void Player::Init(const char *spritePath, Vector2 startPos) {
     vel = {0, 0};
 
     speed = 200.0f;
-    jumpForce = -350.0f;
+    jumpForce = -450.0f;
     isGrounded = false;
 
     frameTime = 0.1f;
     frameTimer = 0.0f;
     currentFrame = 0;
+    scale = 0.35f;  // Make player smaller
 }
 
 void Player::Update(float dt) {
@@ -30,16 +31,18 @@ void Player::Update(float dt) {
         isGrounded = false;
     }
 
-    vel.y += 900 * dt;
+    vel.y += 1500 * dt;
 
     pos.x += vel.x * dt;
     pos.y += vel.y * dt;
 
-    if (pos.y >= 400) {
-        pos.y = 400;
-        vel.y = 0;
-        isGrounded = true;
-    }
+    if (pos.y > 2000) {  
+    // fallback safety
+    pos.y = 400;
+    vel.y = 0;
+    isGrounded = true;
+}
+
 
     if (vel.x != 0) {
         frameTimer += dt;
@@ -59,7 +62,20 @@ void Player::Draw() {
         (float)frameHeight
     };
 
-    if (vel.x < 0) src.width = -frameWidth;
+    // Flip sprite horizontally when moving left
+    if (vel.x < 0) {
+        src.width = -frameWidth;
+    }
 
-    DrawTextureRec(sprite, src, pos, WHITE);
+    // Center the scaled sprite properly
+    Rectangle dest = {
+        pos.x,
+        pos.y - (frameHeight * scale),  // Position feet at pos.y
+        frameWidth * scale,
+        frameHeight * scale
+    };
+
+    Vector2 origin = {0, 0};
+
+    DrawTexturePro(sprite, src, dest, origin, 0.0f, WHITE);
 }

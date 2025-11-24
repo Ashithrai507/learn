@@ -16,6 +16,7 @@ struct Player {
     float frameTime;
     float frameTimer;
     int currentFrame;
+    float scale;
 
     void Init(const char *spritePath, Vector2 startPos);
     void Update(float dt);
