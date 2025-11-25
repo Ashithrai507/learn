@@ -2,73 +2,62 @@
 #include "player.h"
 
 int main() {
-    InitWindow(1200, 700, "Platformer Base");
+    InitWindow(1200, 700, "Advanced Physics - B style");
     SetTargetFPS(60);
 
-    // Player
     Player player;
-
-    // Background
+    player.Init("assets/player.png", {300.0f, 400.0f});
     Texture2D bg = LoadTexture("assets/bg.png");
-
-    // Platform size (will be aligned to bottom of screen)
-    const int platformHeight = 50;
-    // Initialize player so its feet start on top of the platform
-    player.Init("assets/player.png", {100, (float)GetScreenHeight() - platformHeight - 1});
-
-    // PLATFORM (screen-space rectangle that fits the full width)
-    Rectangle platform = { 0.0f, (float)GetScreenHeight() - platformHeight, (float)GetScreenWidth(), (float)platformHeight };
-
-    // Camera (not following for now)
-    Camera2D cam = {0};
-    cam.offset = {600, 350};
-    cam.target = player.pos;
-    cam.rotation = 0.0f;
-    cam.zoom = 1.0f;
-
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
-
-        // Update Player FIRST
         player.Update(dt);
+        float spriteW = player.frameWidth * player.scale;
+        float spriteH = player.frameHeight * player.scale;
 
-        // -----------------------------------------
-        // PLATFORM COLLISION DETECTION (platform is screen-space)
-        // Convert player's world position to screen space for collision
-        // (camera is applied by GetWorldToScreen2D)
-        Vector2 playerScreenPos = GetWorldToScreen2D(player.pos, cam);
-
-        Rectangle playerFeet = {
-            playerScreenPos.x,
-            playerScreenPos.y - 5,
-            player.frameWidth * player.scale,
-            5
+        Rectangle playerBox = {
+            player.pos.x,
+            player.pos.y - spriteH,
+            spriteW,
+            spriteH
         };
 
-        if (CheckCollisionRecs(playerFeet, platform)) {
-            // Snap player's world position so the feet sit on top of the platform.
-            Vector2 targetScreen = { playerScreenPos.x, platform.y };
-            Vector2 worldTarget = GetScreenToWorld2D(targetScreen, cam);
-            player.pos.y = worldTarget.y;
-            player.vel.y = 0;
-            player.isGrounded = true;
+        bool landedThisFrame = false;
+
+        // LEFT
+        if (playerBox.x < 0.0f) {
+            player.pos.x = 0.0f;
+            player.vel.x = 0.0f;
         }
 
+        // RIGHT
+        if (playerBox.x + playerBox.width > GetScreenWidth()) {
+            player.pos.x = GetScreenWidth() - playerBox.width;
+            player.vel.x = 0.0f;
+        }
+
+        // CEILING
+        if (playerBox.y < 0.0f) {
+            player.pos.y = spriteH;
+            player.vel.y = 0.0f;
+        }
+
+        if (playerBox.y + playerBox.height > GetScreenHeight()) {
+            player.pos.y = GetScreenHeight();
+            landedThisFrame = true;
+
+        }
+
+        if (landedThisFrame) {
+            player.Land();
+        } else {
+            if (player.isGrounded) {
+                player.LeaveGround();
+            }
+        }
         BeginDrawing();
         ClearBackground(RAYWHITE);
-
-    DrawTexture(bg, 0, 0, WHITE);
-
-    // Draw platform in screen-space (stays aligned to bottom)
-    DrawRectangleRec(platform, DARKGRAY);
-
-    BeginMode2D(cam);
-
-    // Draw player (world-space, transformed by camera)
-    player.Draw();
-
-    EndMode2D();
-
+        DrawTexture(bg, 0, 0, WHITE);
+        player.Draw();
         EndDrawing();
     }
 
