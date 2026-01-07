@@ -3,7 +3,7 @@
 ```css
 ┌────────────┐       UDP Broadcast       ┌───────────-─┐
 │  Device A  │ <---------------------->  │  Device B   │
-│  Flutter   │                           │  Flutter    │
+│            │                           │             │
 └─────┬──────┘                           └─────-┬──────┘
       │           TCP / WebSocket               │
       └──────── Direct Communication ───────────┘
