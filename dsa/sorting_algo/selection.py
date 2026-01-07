@@ -1,5 +1,4 @@
 list = [5, 2, 9, 1, 5, 6]
-list = [int(x) for x in list]
 n = len(list)
 for i in range(n):
     c=i
