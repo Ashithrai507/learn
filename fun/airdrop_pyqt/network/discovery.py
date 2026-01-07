@@ -1,12 +1,11 @@
 import socket
 import json
 import time
-from PyQt6.QtCore import QThread, pyqtSignal
 import platform
-
+from PyQt6.QtCore import QThread, pyqtSignal
 
 DISCOVERY_PORT = 50000
-BROADCAST_INTERVAL = 3
+BROADCAST_INTERVAL = 2
 
 
 class DiscoveryThread(QThread):
@@ -18,21 +17,24 @@ class DiscoveryThread(QThread):
         self.running = True
 
     def run(self):
-        # UDP socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        sock.bind(("", DISCOVERY_PORT))
         sock.settimeout(1)
 
-        message = json.dumps({
+        payload = {
             "name": self.username,
             "port": 6000,
             "os": platform.system()
-        }).encode()
+        }
 
         while self.running:
             try:
                 # Broadcast presence
-                sock.sendto(message, ('<broadcast>', DISCOVERY_PORT))
+                sock.sendto(
+                    json.dumps(payload).encode(),
+                    ("<broadcast>", DISCOVERY_PORT)
+                )
 
                 # Listen for others
                 data, addr = sock.recvfrom(1024)
@@ -44,6 +46,8 @@ class DiscoveryThread(QThread):
 
             except socket.timeout:
                 pass
+            except Exception as e:
+                print("Discovery error:", e)
 
             time.sleep(BROADCAST_INTERVAL)
 

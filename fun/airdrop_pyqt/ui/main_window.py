@@ -3,18 +3,23 @@ from PyQt6.QtWidgets import (
     QVBoxLayout, QGridLayout, QFrame
 )
 from PyQt6.QtCore import Qt
+from ui.chat_window import ChatWindow
+from network.tcp_server import TCPServer
+
 from network.discovery import DiscoveryThread
 from models.device import Device
 
 
 class DeviceTile(QFrame):
-    def __init__(self, name="Unknown Device"):
+    def __init__(self, device, click_callback):
         super().__init__()
+        self.device = device
+
         self.setFixedSize(140, 140)
         self.setStyleSheet("""
             QFrame {
                 background-color: #1e1e1e;
-                border-radius: 12px;
+                border-radius: 14px;
             }
             QFrame:hover {
                 background-color: #2a2a2a;
@@ -24,17 +29,20 @@ class DeviceTile(QFrame):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        avatar = QLabel("💻")
-        avatar.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        avatar.setStyleSheet("font-size: 36px;")
+        icon = QLabel("💻")
+        icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        icon.setStyleSheet("font-size: 36px;")
 
-        name_label = QLabel(name)
-        name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        name_label.setStyleSheet("color: white;")
+        label = QLabel(device.name)
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        label.setStyleSheet("color: white;")
 
-        layout.addWidget(avatar)
-        layout.addWidget(name_label)
+        layout.addWidget(icon)
+        layout.addWidget(label)
         self.setLayout(layout)
+
+        self.mousePressEvent = lambda e: click_callback(device)
+
 
 
 class MainWindow(QMainWindow):
@@ -43,63 +51,85 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("PyDrop")
         self.setMinimumSize(900, 600)
+        self.setStyleSheet("background-color: #121212;")
 
         self.devices = {}
-        self.discovery = DiscoveryThread(username="Ashith")
-        self.discovery.device_found.connect(self.add_device)
-        self.discovery.start()
-
 
         central = QWidget()
         self.setCentralWidget(central)
 
-        main_layout = QVBoxLayout()
-        main_layout.setSpacing(20)
-        main_layout.setContentsMargins(30, 30, 30, 30)
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(30, 30, 30, 30)
+        self.main_layout.setSpacing(20)
 
-        # Title
         title = QLabel("PyDrop")
-        title.setStyleSheet("font-size: 28px; color: white;")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title.setStyleSheet("font-size: 28px; color: white;")
 
-        # Status
         self.status = QLabel("Searching for nearby devices…")
-        self.status.setStyleSheet("color: #aaaaaa;")
         self.status.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.status.setStyleSheet("color: #aaaaaa;")
 
-        # Device grid
         self.grid = QGridLayout()
         self.grid.setSpacing(20)
         self.grid.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        # TEMP: Dummy devices (for UI testing)
-        for i in range(6):
-            tile = DeviceTile(f"Device {i+1}")
-            self.grid.addWidget(tile, i // 4, i % 4)
+        self.main_layout.addWidget(title)
+        self.main_layout.addWidget(self.status)
+        self.main_layout.addLayout(self.grid)
 
-        main_layout.addWidget(title)
-        main_layout.addWidget(self.status)
-        main_layout.addLayout(self.grid)
+        central.setLayout(self.main_layout)
 
-        central.setLayout(main_layout)
-
-        # Dark background
-        self.setStyleSheet("background-color: #121212;")
+        # Start discovery
+        self.discovery = DiscoveryThread(username="Ashith")
+        self.discovery.device_found.connect(self.add_device)
+        self.discovery.start()
+        # Start TCP server
+        self.server = TCPServer()
+        self.server.message_received.connect(self.receive_message)
+        self.server.start()
+        self.chat_windows = {}
 
     def add_device(self, info):
+        device = Device(info["name"], ip, info["port"])
+        tile = DeviceTile(device, self.open_chat)
+
         ip = info["ip"]
 
         if ip in self.devices:
             return
 
+        print("Discovered device:", info)
+
         device = Device(info["name"], ip, info["port"])
         tile = DeviceTile(device.name)
 
-        row = len(self.devices) // 4
-        col = len(self.devices) % 4
+        index = len(self.devices)
+        row = index // 4
+        col = index % 4
 
         self.grid.addWidget(tile, row, col)
         self.devices[ip] = tile
 
         self.status.setText("Nearby devices found")
 
+    def open_chat(self, device):
+        if device.ip not in self.chat_windows:
+            chat = ChatWindow(device)
+            self.chat_windows[device.ip] = chat
+            chat.show()
+        else:
+            self.chat_windows[device.ip].show()
+
+
+    def receive_message(self, ip, message):
+        if ip in self.chat_windows:
+            self.chat_windows[ip].receive(message)
+
+
+    def closeEvent(self, event):
+        self.discovery.stop()
+        self.discovery.wait()
+        self.server.stop()
+        self.server.wait()
+        event.accept()

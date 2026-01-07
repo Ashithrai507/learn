@@ -203,3 +203,11 @@ Receiver displays message
 - Threads & signals
 - Network discovery
 - Cross-platform packaging
+
+### High-Level Design (Important)
+```python
+Each device:
+ ├─ UDP → discovery (already done)
+ ├─ TCP Server → listens for messages
+ └─ TCP Client → sends messages
+```

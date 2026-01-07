@@ -5,4 +5,4 @@ class Device:
         self.port = port
 
     def __repr__(self):
-        return f"{self.name} ({self.ip})"
+        return f"{self.name} ({self.ip}:{self.port})"
