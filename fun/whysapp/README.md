@@ -158,33 +158,28 @@ Flutter needs native permissions:
 
 ## 8. Exact Folder Structure
 ```json
-lib/
-│
-├── main.dart
-│
-├── core/
-│   ├── models/
-│   │   ├── peer_device.dart
-│   │   ├── message.dart
-│   │
-│   ├── services/
-│   │   ├── discovery_service.dart
-│   │   ├── socket_service.dart
-│   │
-│   ├── utils/
-│
-├── state/
-│   ├── peer_provider.dart
-│   ├── chat_provider.dart
+airdrop_pyqt/
+│── main.py
 │
 ├── ui/
-│   ├── screens/
-│   │   ├── device_list_screen.dart
-│   │   ├── chat_screen.dart
-│   │
-│   ├── widgets/
+│   ├── main_window.py
+│   ├── device_tile.py
+│   └── chat_window.py
 │
-└── config/
+├── network/
+│   ├── discovery.py      # UDP broadcast
+│   ├── server.py         # TCP receiver
+│   └── client.py         # TCP sender
+│
+├── models/
+│   └── device.py
+│
+├── utils/
+│   └── system_info.py
+│
+└── assets/
+    └── icons/
+
 
 ```
 ## 9. Complete Data Flow (End-to-End)
