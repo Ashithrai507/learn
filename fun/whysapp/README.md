@@ -198,3 +198,8 @@ Text message sent
 ↓
 Receiver displays message
 ```
+## Main thing to note during development 
+- Real desktop app architecture
+- Threads & signals
+- Network discovery
+- Cross-platform packaging
