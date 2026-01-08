@@ -128,13 +128,18 @@ class MainWindow(QMainWindow):
 
     # ---------------- Open Chat ---------------- #
     def open_chat(self, device):
-        if device.ip not in self.chat_windows:
-            chat = ChatWindow(device)
-            self.chat_windows[device.ip] = chat
-            chat.show()
-        else:
-            self.chat_windows[device.ip].raise_()
-            self.chat_windows[device.ip].activateWindow()
+        if device.ip in self.chat_windows:
+            chat = self.chat_windows[device.ip]
+            if chat.isVisible():
+                chat.raise_()
+                chat.activateWindow()
+                return
+
+        chat = ChatWindow(device)
+        chat.destroyed.connect(lambda: self.chat_windows.pop(device.ip, None))
+        self.chat_windows[device.ip] = chat
+        chat.show()
+
 
     # ---------------- Receive Message ---------------- #
     def on_message_received(self, ip, message):
