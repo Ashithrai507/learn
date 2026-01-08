@@ -8,6 +8,9 @@ from network.tcp_server import TCPServer
 
 from network.discovery import DiscoveryThread
 from models.device import Device
+import socket
+import platform
+
 
 
 class DeviceTile(QFrame):
@@ -48,6 +51,7 @@ class DeviceTile(QFrame):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        
 
         self.setWindowTitle("PyDrop")
         self.setMinimumSize(900, 600)
@@ -81,7 +85,9 @@ class MainWindow(QMainWindow):
         central.setLayout(self.main_layout)
 
         # Start discovery
-        self.discovery = DiscoveryThread(username="Ashith")
+        
+        device_name = f"{socket.gethostname()}-{platform.system()}"
+        self.discovery = DiscoveryThread(username=device_name)
         self.discovery.device_found.connect(self.add_device)
         self.discovery.start()
         # Start TCP server
