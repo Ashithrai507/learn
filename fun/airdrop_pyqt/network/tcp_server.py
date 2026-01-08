@@ -14,7 +14,7 @@ class TCPServer(QThread):
     def run(self):
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server.bind(("", TCP_PORT))
+        server.bind(("0.0.0.0", TCP_PORT))
         server.listen(5)
         server.settimeout(1)
 
