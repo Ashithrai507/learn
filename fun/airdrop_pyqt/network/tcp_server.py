@@ -18,19 +18,27 @@ class TCPServer(QThread):
         server.listen(5)
         server.settimeout(1)
 
+        print("TCP server listening on port", TCP_PORT)
+
         while self.running:
             try:
                 conn, addr = server.accept()
-                data = conn.recv(4096).decode()
-                if data:
-                    self.message_received.emit(addr[0], data)
-                conn.close()
+                try:
+                    data = conn.recv(4096).decode()
+                    if data:
+                        self.message_received.emit(addr[0], data)
+                except Exception as e:
+                    print("Receive error:", e)
+                finally:
+                    conn.close()
+
             except socket.timeout:
-                pass
+                continue
             except Exception as e:
-                print("TCP server error:", e)
+                print("TCP accept error:", e)
 
         server.close()
+        print("TCP server stopped")
 
     def stop(self):
         self.running = False

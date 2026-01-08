@@ -11,7 +11,9 @@ class ChatWindow(QWidget):
     def __init__(self, device):
         super().__init__()
         self.device = device
+
         self.messages = []
+        self.send_threads = []   # ✅ FIX: keep sender threads alive
 
         self.setWindowTitle(f"Chat – {device.name}")
         self.setMinimumSize(400, 500)
@@ -40,14 +42,16 @@ class ChatWindow(QWidget):
             return
 
         sender = SendMessageThread(self.device.ip, msg)
-        self.send_threads.append(sender)   # KEEP REFERENCE
+
+        # ✅ KEEP THREAD ALIVE
+        self.send_threads.append(sender)
         sender.finished.connect(lambda: self.send_threads.remove(sender))
+
         sender.start()
 
         self.messages.append(("You", msg))
         self.chat_view.append(f"<b>You:</b> {msg}")
         self.input.clear()
-
 
     def receive(self, msg):
         self.messages.append((self.device.name, msg))
