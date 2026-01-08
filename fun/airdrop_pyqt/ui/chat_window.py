@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QTextEdit,
-    QLineEdit, QPushButton, QLabel
+    QLineEdit, QPushButton
 )
+from PyQt6.QtCore import Qt
 from network.tcp_client import send_message
 
 
@@ -9,23 +10,24 @@ class ChatWindow(QWidget):
     def __init__(self, device):
         super().__init__()
         self.device = device
+        self.messages = []  # in-memory storage
 
         self.setWindowTitle(f"Chat – {device.name}")
         self.setMinimumSize(400, 500)
 
         layout = QVBoxLayout()
 
-        self.chat_area = QTextEdit()
-        self.chat_area.setReadOnly(True)
+        self.chat_view = QTextEdit()
+        self.chat_view.setReadOnly(True)
 
         self.input = QLineEdit()
-        self.input.setPlaceholderText("Type a message...")
+        self.input.setPlaceholderText("Type a message…")
+        self.input.returnPressed.connect(self.send)
 
         send_btn = QPushButton("Send")
         send_btn.clicked.connect(self.send)
 
-        layout.addWidget(QLabel(device.name))
-        layout.addWidget(self.chat_area)
+        layout.addWidget(self.chat_view)
         layout.addWidget(self.input)
         layout.addWidget(send_btn)
 
@@ -37,8 +39,12 @@ class ChatWindow(QWidget):
             return
 
         send_message(self.device.ip, msg)
-        self.chat_area.append(f"You: {msg}")
+
+        self.messages.append(("You", msg))
+        self.chat_view.append(f"<b>You:</b> {msg}")
+
         self.input.clear()
 
     def receive(self, msg):
-        self.chat_area.append(f"{self.device.name}: {msg}")
+        self.messages.append((self.device.name, msg))
+        self.chat_view.append(f"<b>{self.device.name}:</b> {msg}")
