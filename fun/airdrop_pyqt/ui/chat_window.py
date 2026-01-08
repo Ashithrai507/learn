@@ -17,7 +17,7 @@ class ChatWindow(QWidget):
         self.send_threads = []
 
         self.setWindowTitle(f"Chat – {device.name}")
-        self.setMinimumSize(450, 550)
+        self.setMinimumSize(460, 560)
 
         layout = QVBoxLayout()
 
@@ -29,7 +29,7 @@ class ChatWindow(QWidget):
                 background-color: #121212;
                 color: white;
                 border: none;
-                font-size: 15px;
+                font-size: 16px;
             }
         """)
 
@@ -48,8 +48,8 @@ class ChatWindow(QWidget):
         send_btn = QPushButton("Send")
         send_btn.setStyleSheet("""
             QPushButton {
-                padding: 10px;
-                font-size: 14px;
+                padding: 12px;
+                font-size: 15px;
                 background-color: #1e88e5;
                 color: white;
                 border-radius: 6px;
@@ -74,47 +74,55 @@ class ChatWindow(QWidget):
         for direction, msg in messages:
             self.add_bubble(msg, direction)
 
-    # ---------- Message bubble ----------
+    # ---------- Message bubble (TABLE BASED) ----------
     def add_bubble(self, message, direction):
         if direction == "sent":
-            bubble = f"""
-            <div style="text-align:right; margin:8px;">
-                <div style="
-                    display:inline-block;
+            html = f"""
+            <table width="100%" cellspacing="0" cellpadding="4">
+              <tr>
+                <td></td>
+                <td align="right">
+                  <div style="
                     background:#1e88e5;
                     color:white;
                     padding:10px 14px;
                     border-radius:14px;
-                    max-width:70%;
-                    font-size:15px;
-                ">
+                    max-width:260px;
+                    font-size:16px;
+                  ">
                     {message}
-                </div>
-            </div>
+                  </div>
+                </td>
+              </tr>
+            </table>
             """
         else:
-            bubble = f"""
-            <div style="text-align:left; margin:8px;">
-                <div style="
-                    display:inline-block;
+            html = f"""
+            <table width="100%" cellspacing="0" cellpadding="4">
+              <tr>
+                <td align="left">
+                  <div style="
                     background:#2a2a2a;
                     color:white;
                     padding:10px 14px;
                     border-radius:14px;
-                    max-width:70%;
-                    font-size:15px;
-                ">
+                    max-width:260px;
+                    font-size:16px;
+                  ">
                     {message}
-                </div>
-            </div>
+                  </div>
+                </td>
+                <td></td>
+              </tr>
+            </table>
             """
 
-        self.chat_view.append(bubble)
+        self.chat_view.append(html)
         self.chat_view.verticalScrollBar().setValue(
             self.chat_view.verticalScrollBar().maximum()
         )
 
-    # ---------- Send message ----------
+    # ---------- Send ----------
     def send(self):
         msg = self.input.text().strip()
         if not msg:
@@ -129,7 +137,7 @@ class ChatWindow(QWidget):
         self.add_bubble(msg, "sent")
         self.input.clear()
 
-    # ---------- Receive message ----------
+    # ---------- Receive ----------
     def receive(self, msg):
         self.db.save_message(self.device.ip, "received", msg)
         self.add_bubble(msg, "received")
