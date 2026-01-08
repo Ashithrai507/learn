@@ -38,7 +38,11 @@ class ChatWindow(QWidget):
         if not msg:
             return
 
-        send_message(self.device.ip, msg)
+        from network.tcp_client import SendMessageThread
+
+        sender = SendMessageThread(self.device.ip, msg)
+        sender.start()
+
 
         self.messages.append(("You", msg))
         self.chat_view.append(f"<b>You:</b> {msg}")
