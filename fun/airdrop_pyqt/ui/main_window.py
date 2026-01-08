@@ -129,7 +129,11 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         self.discovery.stop()
-        self.discovery.wait()
-        self.server.stop()
-        self.server.wait()
+        self.discovery.terminate()
+
+        if hasattr(self, "server"):
+            self.server.stop()
+            self.server.terminate()
+
         event.accept()
+
