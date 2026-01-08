@@ -17,19 +17,47 @@ class ChatWindow(QWidget):
         self.send_threads = []
 
         self.setWindowTitle(f"Chat – {device.name}")
-        self.setMinimumSize(420, 520)
+        self.setMinimumSize(450, 550)
 
         layout = QVBoxLayout()
 
+        # Chat view
         self.chat_view = QTextEdit()
         self.chat_view.setReadOnly(True)
-        self.chat_view.setStyleSheet("background-color: #121212; color: white;")
+        self.chat_view.setStyleSheet("""
+            QTextEdit {
+                background-color: #121212;
+                color: white;
+                border: none;
+                font-size: 15px;
+            }
+        """)
 
+        # Input
         self.input = QLineEdit()
         self.input.setPlaceholderText("Type a message…")
+        self.input.setStyleSheet("""
+            QLineEdit {
+                padding: 10px;
+                font-size: 15px;
+            }
+        """)
         self.input.returnPressed.connect(self.send)
 
+        # Send button
         send_btn = QPushButton("Send")
+        send_btn.setStyleSheet("""
+            QPushButton {
+                padding: 10px;
+                font-size: 14px;
+                background-color: #1e88e5;
+                color: white;
+                border-radius: 6px;
+            }
+            QPushButton:hover {
+                background-color: #1976d2;
+            }
+        """)
         send_btn.clicked.connect(self.send)
 
         layout.addWidget(self.chat_view)
@@ -40,52 +68,53 @@ class ChatWindow(QWidget):
         # Load chat history
         self.load_history()
 
-    # ---------------- Load History ---------------- #
+    # ---------- Load stored messages ----------
     def load_history(self):
         messages = self.db.load_messages(self.device.ip)
         for direction, msg in messages:
             self.add_bubble(msg, direction)
 
-    # ---------------- Message Bubble ---------------- #
+    # ---------- Message bubble ----------
     def add_bubble(self, message, direction):
         if direction == "sent":
             bubble = f"""
-            <div style="
-                text-align: right;
-                margin: 6px;
-            ">
-                <span style="
-                    background:#1e88e5;
-                    padding:8px;
-                    border-radius:10px;
+            <div style="text-align:right; margin:8px;">
+                <div style="
                     display:inline-block;
+                    background:#1e88e5;
+                    color:white;
+                    padding:10px 14px;
+                    border-radius:14px;
                     max-width:70%;
+                    font-size:15px;
                 ">
                     {message}
-                </span>
+                </div>
             </div>
             """
         else:
             bubble = f"""
-            <div style="
-                text-align: left;
-                margin: 6px;
-            ">
-                <span style="
-                    background:#333333;
-                    padding:8px;
-                    border-radius:10px;
+            <div style="text-align:left; margin:8px;">
+                <div style="
                     display:inline-block;
+                    background:#2a2a2a;
+                    color:white;
+                    padding:10px 14px;
+                    border-radius:14px;
                     max-width:70%;
+                    font-size:15px;
                 ">
                     {message}
-                </span>
+                </div>
             </div>
             """
 
         self.chat_view.append(bubble)
+        self.chat_view.verticalScrollBar().setValue(
+            self.chat_view.verticalScrollBar().maximum()
+        )
 
-    # ---------------- Send ---------------- #
+    # ---------- Send message ----------
     def send(self):
         msg = self.input.text().strip()
         if not msg:
@@ -100,7 +129,7 @@ class ChatWindow(QWidget):
         self.add_bubble(msg, "sent")
         self.input.clear()
 
-    # ---------------- Receive ---------------- #
+    # ---------- Receive message ----------
     def receive(self, msg):
         self.db.save_message(self.device.ip, "received", msg)
         self.add_bubble(msg, "received")
