@@ -1,12 +1,16 @@
 import sqlite3
 import time
+from storage.app_paths import get_app_data_dir
 
 DB_NAME = "chat.db"
 
 
 class ChatDB:
     def __init__(self):
-        self.conn = sqlite3.connect(DB_NAME, check_same_thread=False)
+        app_dir = get_app_data_dir()
+        db_path = app_dir / DB_NAME
+
+        self.conn = sqlite3.connect(db_path, check_same_thread=False)
         self.create_table()
 
     def create_table(self):
