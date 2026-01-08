@@ -3,14 +3,15 @@ from PyQt6.QtWidgets import (
     QLineEdit, QPushButton
 )
 from PyQt6.QtCore import Qt
-from network.tcp_client import send_message
+
+from network.tcp_client import SendMessageThread
 
 
 class ChatWindow(QWidget):
     def __init__(self, device):
         super().__init__()
         self.device = device
-        self.messages = []  # in-memory storage
+        self.messages = []
 
         self.setWindowTitle(f"Chat – {device.name}")
         self.setMinimumSize(400, 500)
@@ -38,15 +39,11 @@ class ChatWindow(QWidget):
         if not msg:
             return
 
-        from network.tcp_client import SendMessageThread
-
         sender = SendMessageThread(self.device.ip, msg)
         sender.start()
 
-
         self.messages.append(("You", msg))
         self.chat_view.append(f"<b>You:</b> {msg}")
-
         self.input.clear()
 
     def receive(self, msg):

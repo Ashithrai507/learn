@@ -18,7 +18,6 @@ class DiscoveryThread(QThread):
         self.running = True
 
     def run(self):
-        # Receiver socket
         recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         recv_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         recv_sock.bind(("", MCAST_PORT))
@@ -27,7 +26,6 @@ class DiscoveryThread(QThread):
         recv_sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         recv_sock.settimeout(1)
 
-        # Sender socket
         send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         send_sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
 
@@ -39,7 +37,6 @@ class DiscoveryThread(QThread):
 
         while self.running:
             try:
-                # Send presence
                 send_sock.sendto(payload, (MCAST_GROUP, MCAST_PORT))
 
                 try:
@@ -48,7 +45,6 @@ class DiscoveryThread(QThread):
 
                     if info["name"] != self.username:
                         info["ip"] = addr[0]
-                        print("Discovered:", info)
                         self.device_found.emit(info)
 
                 except socket.timeout:

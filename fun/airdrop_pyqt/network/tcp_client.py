@@ -13,7 +13,7 @@ class SendMessageThread(QThread):
     def run(self):
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(3)  # ⏱ prevent blocking forever
+            sock.settimeout(3)
             sock.connect((self.ip, TCP_PORT))
             sock.sendall(self.message.encode())
             sock.close()
