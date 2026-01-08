@@ -1,20 +1,18 @@
+import socket
+import platform
+
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QLabel,
     QVBoxLayout, QGridLayout, QFrame
 )
 from PyQt6.QtCore import Qt
-from ui.chat_window import ChatWindow
-from network.tcp_server import TCPServer
 
 from network.discovery import DiscoveryThread
 from models.device import Device
-import socket
-import platform
-
 
 
 class DeviceTile(QFrame):
-    def __init__(self, device, click_callback):
+    def __init__(self, device):
         super().__init__()
         self.device = device
 
@@ -44,27 +42,27 @@ class DeviceTile(QFrame):
         layout.addWidget(label)
         self.setLayout(layout)
 
-        self.mousePressEvent = lambda e: click_callback(device)
-
-
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        
 
         self.setWindowTitle("PyDrop")
         self.setMinimumSize(900, 600)
         self.setStyleSheet("background-color: #121212;")
+
+        # UNIQUE device name (CRITICAL)
+        self.device_name = f"{socket.gethostname()}-{platform.system()}"
+        print("My device name:", self.device_name)
 
         self.devices = {}
 
         central = QWidget()
         self.setCentralWidget(central)
 
-        self.main_layout = QVBoxLayout()
-        self.main_layout.setContentsMargins(30, 30, 30, 30)
-        self.main_layout.setSpacing(20)
+        layout = QVBoxLayout()
+        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(20)
 
         title = QLabel("PyDrop")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -78,68 +76,35 @@ class MainWindow(QMainWindow):
         self.grid.setSpacing(20)
         self.grid.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        self.main_layout.addWidget(title)
-        self.main_layout.addWidget(self.status)
-        self.main_layout.addLayout(self.grid)
-
-        central.setLayout(self.main_layout)
+        layout.addWidget(title)
+        layout.addWidget(self.status)
+        layout.addLayout(self.grid)
+        central.setLayout(layout)
 
         # Start discovery
-        
-        device_name = f"{socket.gethostname()}-{platform.system()}"
-        self.discovery = DiscoveryThread(username=device_name)
+        self.discovery = DiscoveryThread(self.device_name)
         self.discovery.device_found.connect(self.add_device)
         self.discovery.start()
-        # Start TCP server
-        self.server = TCPServer()
-        self.server.message_received.connect(self.receive_message)
-        self.server.start()
-        self.chat_windows = {}
 
     def add_device(self, info):
-        device = Device(info["name"], ip, info["port"])
-        tile = DeviceTile(device, self.open_chat)
-
         ip = info["ip"]
 
         if ip in self.devices:
             return
 
-        print("Discovered device:", info)
-
         device = Device(info["name"], ip, info["port"])
-        tile = DeviceTile(device.name)
+        print("UI adding device:", device)
 
+        tile = DeviceTile(device)
         index = len(self.devices)
-        row = index // 4
-        col = index % 4
 
-        self.grid.addWidget(tile, row, col)
+        self.grid.addWidget(tile, index // 4, index % 4)
         self.devices[ip] = tile
 
         self.status.setText("Nearby devices found")
 
-    def open_chat(self, device):
-        if device.ip not in self.chat_windows:
-            chat = ChatWindow(device)
-            self.chat_windows[device.ip] = chat
-            chat.show()
-        else:
-            self.chat_windows[device.ip].show()
-
-
-    def receive_message(self, ip, message):
-        if ip in self.chat_windows:
-            self.chat_windows[ip].receive(message)
-
-
     def closeEvent(self, event):
+        # HARD STOP – prevents freezing
         self.discovery.stop()
         self.discovery.terminate()
-
-        if hasattr(self, "server"):
-            self.server.stop()
-            self.server.terminate()
-
         event.accept()
-

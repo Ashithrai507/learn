@@ -4,8 +4,9 @@ import time
 import platform
 from PyQt6.QtCore import QThread, pyqtSignal
 
-DISCOVERY_PORT = 50000
-BROADCAST_INTERVAL = 2
+MCAST_GROUP = "224.1.1.1"
+MCAST_PORT = 50000
+INTERVAL = 2
 
 
 class DiscoveryThread(QThread):
@@ -17,15 +18,18 @@ class DiscoveryThread(QThread):
         self.running = True
 
     def run(self):
-        # Sender socket (broadcast only)
-        sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sender.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        # Receiver socket
+        recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        recv_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        recv_sock.bind(("", MCAST_PORT))
 
-        # Listener socket (receive only)
-        listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        listener.bind(("", DISCOVERY_PORT))
-        listener.settimeout(1)
+        mreq = socket.inet_aton(MCAST_GROUP) + socket.inet_aton("0.0.0.0")
+        recv_sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+        recv_sock.settimeout(1)
+
+        # Sender socket
+        send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        send_sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
 
         payload = json.dumps({
             "name": self.username,
@@ -35,28 +39,28 @@ class DiscoveryThread(QThread):
 
         while self.running:
             try:
-                # Broadcast presence
-                sender.sendto(payload, ("255.255.255.255", DISCOVERY_PORT))
+                # Send presence
+                send_sock.sendto(payload, (MCAST_GROUP, MCAST_PORT))
 
-                # Listen for others
                 try:
-                    data, addr = listener.recvfrom(1024)
+                    data, addr = recv_sock.recvfrom(1024)
                     info = json.loads(data.decode())
 
                     if info["name"] != self.username:
                         info["ip"] = addr[0]
+                        print("Discovered:", info)
                         self.device_found.emit(info)
 
                 except socket.timeout:
                     pass
 
-                time.sleep(BROADCAST_INTERVAL)
+                time.sleep(INTERVAL)
 
             except Exception as e:
                 print("Discovery error:", e)
 
-        sender.close()
-        listener.close()
+        recv_sock.close()
+        send_sock.close()
 
     def stop(self):
         self.running = False
